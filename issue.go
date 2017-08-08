@@ -27,5 +27,5 @@ type Issue struct {
 	CustomFields   []string  `json:"customFields"`
 	Attachments    []string  `json:"attachments"`
 	SharedFiles    []string  `json:"sharedFiles"`
-	Stars          []string  `json:"stars"`
+	Stars          []Star    `json:"stars"`
 }
