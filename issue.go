@@ -14,7 +14,7 @@ type Issue struct {
 	Assignee       User         `json:"assignee"`
 	Category       []Category   `json:"category"`
 	Versions       []string     `json:"versions"`
-	Milestone      []string     `json:"milestone"`
+	Milestone      []Milestone  `json:"milestone"`
 	StartDate      Date         `json:"startDate"`
 	DueDate        Date         `json:"dueDate"`
 	EstimatedHours float64      `json:"estimatedHours"`
