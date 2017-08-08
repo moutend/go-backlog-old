@@ -26,6 +26,6 @@ type Issue struct {
 	Updated        Date         `json:"updated"`
 	CustomFields   []string     `json:"customFields"`
 	Attachments    []Attachment `json:"attachments"`
-	SharedFiles    []string     `json:"sharedFiles"`
+	SharedFiles    []SharedFile `json:"sharedFiles"`
 	Stars          []Star       `json:"stars"`
 }
