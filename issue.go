@@ -8,7 +8,7 @@ type Issue struct {
 	IssueType      IssueType  `json:"issueType"`
 	Summary        string     `json:"summary"`
 	Description    string     `json:"description"`
-	Resolution     string     `json:"resolution"`
+	Resolution     Resolution `json:"resolution"`
 	Priority       Priority   `json:"priority"`
 	Status         Status     `json:"status"`
 	Assignee       User       `json:"assignee"`
