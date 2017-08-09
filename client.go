@@ -11,24 +11,24 @@ import (
 )
 
 type Client struct {
-	token   string
-	apiroot *url.URL
+	token string
+	root  *url.URL
 }
 
 func New(spaceName, token string) (*Client, error) {
 	var err error
-	var apiroot *url.URL
+	var root *url.URL
 
 	if spaceName == "" {
 		return nil, fmt.Errorf("space name is empty")
 	}
-	if apiroot, err = url.Parse("https://" + spaceName + ".backlog.jp/api/v2/"); err != nil {
+	if root, err = url.Parse("https://" + spaceName + ".backlog.jp/api/v2/"); err != nil {
 		return nil, err
 	}
 
 	client := &Client{
 		token,
-		apiroot,
+		root,
 	}
 
 	return client, nil
@@ -134,7 +134,7 @@ func (c *Client) GetIssuesContext(ctx context.Context, query url.Values) ([]*Iss
 	if query == nil {
 		query = url.Values{}
 	}
-	if path, err = c.apiroot.Parse("./issues"); err != nil {
+	if path, err = c.root.Parse("./issues"); err != nil {
 		return nil, err
 	}
 	if response, err = c.getContext(ctx, path, query); err != nil {
@@ -157,7 +157,7 @@ func (c *Client) GetIssueContext(ctx context.Context, issueId int) (*Issue, erro
 	var issue Issue
 	var path *url.URL
 
-	if path, err = c.apiroot.Parse(fmt.Sprintf("./issues/%v", issueId)); err != nil {
+	if path, err = c.root.Parse(fmt.Sprintf("./issues/%v", issueId)); err != nil {
 		return nil, err
 	}
 	if response, err = c.getContext(ctx, path, nil); err != nil {
@@ -180,7 +180,7 @@ func (c *Client) SetIssueContext(ctx context.Context, issueId int, values url.Va
 	var issue Issue
 	var path *url.URL
 
-	if path, err = c.apiroot.Parse(fmt.Sprintf("./issues/%v", issueId)); err != nil {
+	if path, err = c.root.Parse(fmt.Sprintf("./issues/%v", issueId)); err != nil {
 		return nil, err
 	}
 	if response, err = c.patchContext(ctx, path, values); err != nil {
@@ -203,7 +203,7 @@ func (c *Client) GetStatusesContext(ctx context.Context) ([]*Status, error) {
 	var statuses []*Status
 	var path *url.URL
 
-	if path, err = c.apiroot.Parse("./statuses"); err != nil {
+	if path, err = c.root.Parse("./statuses"); err != nil {
 		return nil, err
 	}
 	if response, err = c.getContext(ctx, path, nil); err != nil {
