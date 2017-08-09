@@ -192,3 +192,26 @@ func (c *Client) SetIssueContext(ctx context.Context, issueId int, values url.Va
 
 	return &issue, nil
 }
+
+func (c *Client) GetStatuses() ([]*Status, error) {
+	return c.GetStatusesContext(context.Background())
+}
+
+func (c *Client) GetStatusesContext(ctx context.Context) ([]*Status, error) {
+	var err error
+	var response []byte
+	var statuses []*Status
+	var path *url.URL
+
+	if path, err = c.apiroot.Parse("./statuses"); err != nil {
+		return nil, err
+	}
+	if response, err = c.getContext(ctx, path, nil); err != nil {
+		return nil, err
+	}
+	if err = json.Unmarshal(response, &statuses); err != nil {
+		return nil, err
+	}
+
+	return statuses, nil
+}
