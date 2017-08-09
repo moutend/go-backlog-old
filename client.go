@@ -6,13 +6,15 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/url"
 )
 
 type Client struct {
-	token string
-	root  *url.URL
+	token  string
+	root   *url.URL
+	logger *log.Logger
 }
 
 func New(spaceName, token string) (*Client, error) {
@@ -26,9 +28,11 @@ func New(spaceName, token string) (*Client, error) {
 		return nil, err
 	}
 
+	logger := log.New(ioutil.Discard, "", log.LstdFlags)
 	client := &Client{
 		token,
 		root,
+		logger,
 	}
 
 	return client, nil
@@ -119,6 +123,13 @@ func (c *Client) patchContext(ctx context.Context, endpoint *url.URL, values url
 	}
 
 	return nil, errors.Errors[0]
+}
+
+func (c *Client) SetLogger(logger *log.Logger) {
+	c.logger = logger
+	c.logger.Println("set logger")
+
+	return
 }
 
 func (c *Client) GetIssues(query url.Values) ([]*Issue, error) {
