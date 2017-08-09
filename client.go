@@ -1,6 +1,7 @@
 package backlog
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -77,21 +78,20 @@ func (c *Client) getContext(ctx context.Context, endpoint *url.URL, query url.Va
 	return nil, errors.Errors[0]
 }
 
-func (c *Client) patchContext(ctx context.Context, endpoint *url.URL, query url.Values) (response []byte, err error) {
+func (c *Client) patchContext(ctx context.Context, endpoint *url.URL, values url.Values) (response []byte, err error) {
 	var req *http.Request
 	var res *http.Response
 
-	if req, err = http.NewRequest("PATCH", endpoint.String(), nil); err != nil {
+	payload := bytes.NewBufferString(values.Encode())
+
+	if req, err = http.NewRequest("PATCH", endpoint.String(), payload); err != nil {
 		return nil, err
 	}
 
 	httpClient := &http.Client{}
 	req = req.WithContext(ctx)
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	q := req.URL.Query()
-
-	for key, value := range query {
-		q.Add(key, value[0])
-	}
 
 	// The value of `apiKey` is always required.
 	q.Add("apiKey", c.token)
@@ -161,6 +161,29 @@ func (c *Client) GetIssueContext(ctx context.Context, issueId int) (*Issue, erro
 		return nil, err
 	}
 	if response, err = c.getContext(ctx, path, nil); err != nil {
+		return nil, err
+	}
+	if err = json.Unmarshal(response, &issue); err != nil {
+		return nil, err
+	}
+
+	return &issue, nil
+}
+
+func (c *Client) SetIssue(issueId int, values url.Values) (*Issue, error) {
+	return c.SetIssueContext(context.Background(), issueId, values)
+}
+
+func (c *Client) SetIssueContext(ctx context.Context, issueId int, values url.Values) (*Issue, error) {
+	var err error
+	var response []byte
+	var issue Issue
+	var path *url.URL
+
+	if path, err = c.apiroot.Parse(fmt.Sprintf("./issues/%v", issueId)); err != nil {
+		return nil, err
+	}
+	if response, err = c.patchContext(ctx, path, values); err != nil {
 		return nil, err
 	}
 	if err = json.Unmarshal(response, &issue); err != nil {
