@@ -121,11 +121,11 @@ func (c *Client) patchContext(ctx context.Context, endpoint *url.URL, values url
 	return nil, errors.Errors[0]
 }
 
-func (c *Client) Issues(query url.Values) ([]*Issue, error) {
-	return c.IssuesContext(context.Background(), query)
+func (c *Client) GetIssues(query url.Values) ([]*Issue, error) {
+	return c.GetIssuesContext(context.Background(), query)
 }
 
-func (c *Client) IssuesContext(ctx context.Context, query url.Values) ([]*Issue, error) {
+func (c *Client) GetIssuesContext(ctx context.Context, query url.Values) ([]*Issue, error) {
 	var err error
 	var response []byte
 	var issues []*Issue
