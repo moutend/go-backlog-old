@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -125,11 +126,87 @@ func (c *Client) patchContext(ctx context.Context, endpoint *url.URL, values url
 	return nil, errors.Errors[0]
 }
 
+func (c *Client) postContext(ctx context.Context, endpoint *url.URL, query url.Values, payload io.Reader) (response []byte, err error) {
+	var req *http.Request
+	var res *http.Response
+
+	c.logger.Println(payload)
+	c.logger.Println("POST", endpoint)
+
+	if req, err = http.NewRequest("POST", endpoint.String(), payload); err != nil {
+		return nil, err
+	}
+
+	httpClient := &http.Client{}
+	req = req.WithContext(ctx)
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	q := req.URL.Query()
+
+	for key, value := range query {
+		q.Add(key, value[0])
+	}
+
+	// The value of `apiKey` is always required.
+	q.Add("apiKey", c.token)
+	rawQuery := q.Encode()
+	req.URL.RawQuery = rawQuery
+	c.logger.Println("query parameter:", rawQuery)
+
+	if res, err = httpClient.Do(req); err != nil {
+		return nil, err
+	}
+	defer res.Body.Close()
+
+	if response, err = ioutil.ReadAll(res.Body); err != nil {
+		return nil, err
+	}
+	if res.StatusCode == 200 {
+		return response, nil
+	}
+
+	var errors Errors
+
+	if err = json.Unmarshal(response, &errors); err != nil {
+		return nil, err
+	}
+	if len(errors.Errors) == 0 {
+		return nil, fmt.Errorf("error response is broken")
+	}
+
+	return nil, errors.Errors[0]
+}
+
 func (c *Client) SetLogger(logger *log.Logger) {
 	c.logger = logger
 	c.logger.Println("set logger")
 
 	return
+}
+
+func (c *Client) GetProjects(query url.Values) ([]*Project, error) {
+	return c.GetProjectsContext(context.Background(), query)
+}
+
+func (c *Client) GetProjectsContext(ctx context.Context, query url.Values) ([]*Project, error) {
+	var err error
+	var response []byte
+	var projects []*Project
+	var path *url.URL
+
+	if query == nil {
+		query = url.Values{}
+	}
+	if path, err = c.root.Parse("./projects"); err != nil {
+		return nil, err
+	}
+	if response, err = c.getContext(ctx, path, query); err != nil {
+		return nil, err
+	}
+	if err = json.Unmarshal(response, &projects); err != nil {
+		return nil, err
+	}
+
+	return projects, nil
 }
 
 func (c *Client) GetIssues(query url.Values) ([]*Issue, error) {
@@ -176,6 +253,31 @@ func (c *Client) GetIssueContext(ctx context.Context, issueId int) (*Issue, erro
 	}
 	if err = json.Unmarshal(response, &issue); err != nil {
 		return nil, err
+	}
+
+	return &issue, nil
+}
+func (c *Client) CreateIssue(values url.Values) (*Issue, error) {
+	return c.CreateIssueContext(context.Background(), values)
+}
+
+func (c *Client) CreateIssueContext(ctx context.Context, values url.Values) (*Issue, error) {
+	var err error
+	var response []byte
+	var issue Issue
+	var path *url.URL
+
+	errorPrefix := "CreateIssueContext"
+	payload := bytes.NewBufferString(values.Encode())
+
+	if path, err = c.root.Parse("./issues"); err != nil {
+		return nil, fmt.Errorf("%s: %s", errorPrefix, err)
+	}
+	if response, err = c.postContext(ctx, path, nil, payload); err != nil {
+		return nil, fmt.Errorf("%s: %s", errorPrefix, err)
+	}
+	if err = json.Unmarshal(response, &issue); err != nil {
+		return nil, fmt.Errorf("%s: %s", errorPrefix, err)
 	}
 
 	return &issue, nil

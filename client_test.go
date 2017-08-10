@@ -70,6 +70,15 @@ func TestMain(m *testing.M) {
 	return
 }
 
+func TestGetProjectsContext(t *testing.T) {
+	ctx := context.Background()
+	_, err := client.GetProjectsContext(ctx, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return
+}
+
 func TestGetIssuesContext(t *testing.T) {
 	ctx := context.Background()
 	_, err := client.GetIssuesContext(ctx, nil)
