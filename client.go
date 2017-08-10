@@ -204,6 +204,31 @@ func (c *Client) SetIssueContext(ctx context.Context, issueId int, values url.Va
 	return &issue, nil
 }
 
+func (c *Client) GetIssuesCount(ctx context.Context, query url.Values) (int, error) {
+	return c.GetIssuesCount(context.Background(), query)
+}
+
+func (c *Client) GetIssuesCountContext(ctx context.Context, query url.Values) (int, error) {
+	var err error
+	var response []byte
+	var count struct {
+		Count int `json:"count"`
+	}
+	var path *url.URL
+
+	if path, err = c.root.Parse("./issues/count"); err != nil {
+		return 0, err
+	}
+	if response, err = c.getContext(ctx, path, query); err != nil {
+		return 0, err
+	}
+	if err = json.Unmarshal(response, &count); err != nil {
+		return 0, err
+	}
+
+	return count.Count, nil
+}
+
 func (c *Client) GetStatuses() ([]*Status, error) {
 	return c.GetStatusesContext(context.Background())
 }

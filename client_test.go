@@ -97,6 +97,15 @@ func TestSetIssueContext(t *testing.T) {
 	return
 }
 
+func TestGetIssuesCountContext(t *testing.T) {
+	ctx := context.Background()
+	_, err := client.GetIssuesCountContext(ctx, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return
+}
+
 func TestGetStatusesContext(t *testing.T) {
 	ctx := context.Background()
 	_, err := client.GetStatusesContext(ctx)
