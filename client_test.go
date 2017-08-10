@@ -78,3 +78,30 @@ func TestGetIssuesContext(t *testing.T) {
 	}
 	return
 }
+
+func TestGetIssueContext(t *testing.T) {
+	ctx := context.Background()
+	_, err := client.GetIssueContext(ctx, 12345)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return
+}
+
+func TestSetIssueContext(t *testing.T) {
+	ctx := context.Background()
+	_, err := client.SetIssueContext(ctx, 12345, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return
+}
+
+func TestGetStatusesContext(t *testing.T) {
+	ctx := context.Background()
+	_, err := client.GetStatusesContext(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return
+}
