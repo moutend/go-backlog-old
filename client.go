@@ -67,7 +67,7 @@ func (c *Client) getContext(ctx context.Context, endpoint *url.URL, query url.Va
 	if response, err = ioutil.ReadAll(res.Body); err != nil {
 		return nil, err
 	}
-	if res.StatusCode == 200 {
+	if res.StatusCode >= 200 && res.StatusCode < 300 {
 		return response, nil
 	}
 
@@ -110,7 +110,7 @@ func (c *Client) patchContext(ctx context.Context, endpoint *url.URL, values url
 	if response, err = ioutil.ReadAll(res.Body); err != nil {
 		return nil, err
 	}
-	if res.StatusCode == 200 {
+	if res.StatusCode >= 200 && res.StatusCode < 300 {
 		return response, nil
 	}
 
@@ -160,7 +160,7 @@ func (c *Client) postContext(ctx context.Context, endpoint *url.URL, query url.V
 	if response, err = ioutil.ReadAll(res.Body); err != nil {
 		return nil, err
 	}
-	if res.StatusCode == 200 {
+	if res.StatusCode >= 200 && res.StatusCode < 300 {
 		return response, nil
 	}
 
