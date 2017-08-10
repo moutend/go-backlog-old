@@ -1,0 +1,65 @@
+{
+  "id": 6763069,
+  "projectId": 51884,
+  "issueKey": "sample-issue",
+  "keyId": 36,
+  "issueType": {
+    "id": 234158,
+    "projectId": 51884,
+    "name": "Task",
+    "color": "#7ea800",
+    "displayOrder": 0
+  },
+  "summary": "summery of the issue",
+  "description": "description of the issue",
+  "resolution": null,
+  "priority": {
+    "id": 3,
+    "name": "middle"
+  },
+  "status": {
+    "id": 2,
+    "name": "ongoing"
+  },
+  "assignee": {
+    "id": 137435,
+    "userId": null,
+    "name": "foo",
+    "roleType": 2,
+    "lang": null,
+    "mailAddress": null,
+    "nulabAccount": null
+  },
+  "category": [],
+  "versions": [],
+  "milestone": [],
+  "startDate": null,
+  "dueDate": null,
+  "estimatedHours": null,
+  "actualHours": null,
+  "parentIssueId": 6759843,
+  "createdUser": {
+    "id": 137435,
+    "userId": null,
+    "name": "foo",
+    "roleType": 2,
+    "lang": null,
+    "mailAddress": null,
+    "nulabAccount": null
+  },
+  "created": "2017-08-08T00:56:08Z",
+  "updatedUser": {
+    "id": 137435,
+    "userId": null,
+    "name": "foo",
+    "roleType": 2,
+    "lang": null,
+    "mailAddress": null,
+    "nulabAccount": null
+  },
+  "updated": "2017-08-08T01:12:21Z",
+  "customFields": [],
+  "attachments": [],
+  "sharedFiles": [],
+  "stars": []
+}
