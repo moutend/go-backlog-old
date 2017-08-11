@@ -354,7 +354,7 @@ func (c *Client) GetStatusesContext(ctx context.Context) ([]*Status, error) {
 	return statuses, nil
 }
 
-func (c *Client) GetIssueType(projectId int) ([]*IssueType, error) {
+func (c *Client) GetIssueTypes(projectId int) ([]*IssueType, error) {
 	return c.GetIssueTypesContext(context.Background(), projectId)
 }
 
