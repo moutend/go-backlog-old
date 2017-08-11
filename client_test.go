@@ -39,9 +39,8 @@ func setup() (*httptest.Server, error) {
 		return nil, err
 	}
 
-	client = &Client{
-		root: root,
-	}
+	client, _ = New("spaceName", "XXXXXXXX")
+	client.root = root
 
 	return server, nil
 }
