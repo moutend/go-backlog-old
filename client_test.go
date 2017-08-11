@@ -132,3 +132,12 @@ func TestGetIssueTypesContext(t *testing.T) {
 	}
 	return
 }
+
+func TestGetPrioritiesContext(t *testing.T) {
+	ctx := context.Background()
+	_, err := client.GetPrioritiesContext(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return
+}

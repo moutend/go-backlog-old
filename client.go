@@ -57,7 +57,11 @@ func (c *Client) getContext(ctx context.Context, endpoint *url.URL, query url.Va
 
 	// The value of `apiKey` is always required.
 	q.Add("apiKey", c.token)
-	req.URL.RawQuery = q.Encode()
+	rawQuery := q.Encode()
+	req.URL.RawQuery = rawQuery
+
+	c.logger.Println("GET", endpoint)
+	c.logger.Println("query parameter:", rawQuery)
 
 	if res, err = httpClient.Do(req); err != nil {
 		return nil, err
@@ -375,4 +379,27 @@ func (c *Client) GetIssueTypesContext(ctx context.Context, projectId int) ([]*Is
 	}
 
 	return issueTypes, nil
+}
+
+func (c *Client) GetPriorities() ([]*Priority, error) {
+	return c.GetPrioritiesContext(context.Background())
+}
+
+func (c *Client) GetPrioritiesContext(ctx context.Context) ([]*Priority, error) {
+	var err error
+	var response []byte
+	var priorities []*Priority
+	var path *url.URL
+
+	if path, err = c.root.Parse("./priorities"); err != nil {
+		return nil, err
+	}
+	if response, err = c.getContext(ctx, path, nil); err != nil {
+		return nil, err
+	}
+	if err = json.Unmarshal(response, &priorities); err != nil {
+		return nil, err
+	}
+
+	return priorities, nil
 }
