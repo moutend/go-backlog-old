@@ -353,3 +353,26 @@ func (c *Client) GetStatusesContext(ctx context.Context) ([]*Status, error) {
 
 	return statuses, nil
 }
+
+func (c *Client) GetIssueType(projectId int) ([]*IssueType, error) {
+	return c.GetIssueTypesContext(context.Background(), projectId)
+}
+
+func (c *Client) GetIssueTypesContext(ctx context.Context, projectId int) ([]*IssueType, error) {
+	var err error
+	var response []byte
+	var issueTypes []*IssueType
+	var path *url.URL
+
+	if path, err = c.root.Parse(fmt.Sprintf("./projects/%v/issueTypes", projectId)); err != nil {
+		return nil, err
+	}
+	if response, err = c.getContext(ctx, path, nil); err != nil {
+		return nil, err
+	}
+	if err = json.Unmarshal(response, &issueTypes); err != nil {
+		return nil, err
+	}
+
+	return issueTypes, nil
+}

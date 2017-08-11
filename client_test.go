@@ -123,3 +123,12 @@ func TestGetStatusesContext(t *testing.T) {
 	}
 	return
 }
+
+func TestGetIssueTypesContext(t *testing.T) {
+	ctx := context.Background()
+	_, err := client.GetIssueTypesContext(ctx, 12345)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return
+}
