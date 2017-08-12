@@ -1,5 +1,7 @@
 package backlog
 
+import "fmt"
+
 type Error struct {
 	Message  string `json:"message"`
 	Code     int    `json:"code"`
@@ -7,30 +9,33 @@ type Error struct {
 }
 
 func (e Error) Error() string {
+	var errorType string
+
 	switch e.Code {
 	case 1:
-		return "InternalError"
+		errorType += "InternalError"
 	case 2:
-		return "LicenceError"
+		errorType += "LicenceError"
 	case 3:
-		return "LicenceExpiredError"
+		errorType += "LicenceExpiredError"
 	case 4:
-		return "AccessDeniedError"
+		errorType += "AccessDeniedError"
 	case 5:
-		return "UnauthorizedOperationError"
+		errorType += "UnauthorizedOperationError"
 	case 6:
-		return "NoResourceError"
+		errorType += "NoResourceError"
 	case 7:
-		return "InvalidRequestError"
+		errorType += "InvalidRequestError"
 	case 8:
-		return "SpaceOverCapacityError"
+		errorType += "SpaceOverCapacityError"
 	case 9:
-		return "ResourceOverflowError"
+		errorType += "ResourceOverflowError"
 	case 10:
-		return "TooLargeFileError"
+		errorType += "TooLargeFileError"
 	case 11:
-		return "AuthenticationError"
+		errorType += "AuthenticationError"
 	default:
-		return "UnexpectedError"
+		errorType += "UnexpectedError"
 	}
+	return fmt.Sprintf("%v (%v)", e.Message, errorType)
 }
