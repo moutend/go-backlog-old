@@ -104,7 +104,12 @@ func (c *Client) patchContext(ctx context.Context, endpoint *url.URL, values url
 
 	// The value of `apiKey` is always required.
 	q.Add("apiKey", c.token)
-	req.URL.RawQuery = q.Encode()
+	rawQuery := q.Encode()
+	req.URL.RawQuery = rawQuery
+
+	c.logger.Println("PATCH", endpoint)
+	c.logger.Println(rawQuery)
+	c.logger.Println(payload)
 
 	if res, err = httpClient.Do(req); err != nil {
 		return nil, err
