@@ -39,31 +39,34 @@ func New(spaceName, token string) (*Client, error) {
 	return client, nil
 }
 
-func (c *Client) getContext(ctx context.Context, endpoint *url.URL, query url.Values) (response []byte, err error) {
-	var req *http.Request
-	var res *http.Response
+func (c *Client) doContext(ctx context.Context, method string, endpoint *url.URL, query url.Values, payload io.Reader) (response []byte, err error) {
+	c.logger.Println(method, endpoint)
 
-	if req, err = http.NewRequest("GET", endpoint.String(), nil); err != nil {
+	if query == nil {
+		query = url.Values{}
+	}
+
+	// The value of 'apiKey' is always required.
+	query.Add("apiKey", c.token)
+	endpoint.RawQuery = query.Encode()
+
+	c.logger.Println("query", endpoint.RawQuery)
+	c.logger.Println("payload", payload)
+
+	req, err := http.NewRequest(method, endpoint.String(), payload)
+	if err != nil {
 		return nil, err
 	}
 
 	httpClient := &http.Client{}
 	req = req.WithContext(ctx)
-	q := req.URL.Query()
 
-	for key, value := range query {
-		q.Add(key, value[0])
+	if method == "POST" || method == "PATCH" {
+		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	}
 
-	// The value of `apiKey` is always required.
-	q.Add("apiKey", c.token)
-	rawQuery := q.Encode()
-	req.URL.RawQuery = rawQuery
-
-	c.logger.Println("GET", endpoint)
-	c.logger.Println("query parameter:", rawQuery)
-
-	if res, err = httpClient.Do(req); err != nil {
+	res, err := httpClient.Do(req)
+	if err != nil {
 		return nil, err
 	}
 	defer res.Body.Close()
@@ -87,150 +90,20 @@ func (c *Client) getContext(ctx context.Context, endpoint *url.URL, query url.Va
 	return nil, errors.Errors[0]
 }
 
-func (c *Client) patchContext(ctx context.Context, endpoint *url.URL, values url.Values) (response []byte, err error) {
-	var req *http.Request
-	var res *http.Response
+func (c *Client) getContext(ctx context.Context, endpoint *url.URL, query url.Values) (response []byte, err error) {
+	return c.doContext(ctx, "GET", endpoint, query, nil)
+}
 
-	payload := bytes.NewBufferString(values.Encode())
-
-	if req, err = http.NewRequest("PATCH", endpoint.String(), payload); err != nil {
-		return nil, err
-	}
-
-	httpClient := &http.Client{}
-	req = req.WithContext(ctx)
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-	q := req.URL.Query()
-
-	// The value of `apiKey` is always required.
-	q.Add("apiKey", c.token)
-	rawQuery := q.Encode()
-	req.URL.RawQuery = rawQuery
-
-	c.logger.Println("PATCH", endpoint)
-	c.logger.Println(rawQuery)
-	c.logger.Println(payload)
-
-	if res, err = httpClient.Do(req); err != nil {
-		return nil, err
-	}
-	defer res.Body.Close()
-
-	if response, err = ioutil.ReadAll(res.Body); err != nil {
-		return nil, err
-	}
-	if res.StatusCode >= 200 && res.StatusCode < 300 {
-		return response, nil
-	}
-
-	var errors Errors
-
-	if err = json.Unmarshal(response, &errors); err != nil {
-		return nil, err
-	}
-	if len(errors.Errors) == 0 {
-		return nil, fmt.Errorf("error response is broken")
-	}
-
-	return nil, errors.Errors[0]
+func (c *Client) patchContext(ctx context.Context, endpoint *url.URL, query url.Values, payload io.Reader) (response []byte, err error) {
+	return c.doContext(ctx, "PATCH", endpoint, query, payload)
 }
 
 func (c *Client) postContext(ctx context.Context, endpoint *url.URL, query url.Values, payload io.Reader) (response []byte, err error) {
-	var req *http.Request
-	var res *http.Response
-
-	c.logger.Println(payload)
-	c.logger.Println("POST", endpoint)
-
-	if req, err = http.NewRequest("POST", endpoint.String(), payload); err != nil {
-		return nil, err
-	}
-
-	httpClient := &http.Client{}
-	req = req.WithContext(ctx)
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-	q := req.URL.Query()
-
-	for key, value := range query {
-		q.Add(key, value[0])
-	}
-
-	// The value of `apiKey` is always required.
-	q.Add("apiKey", c.token)
-	rawQuery := q.Encode()
-	req.URL.RawQuery = rawQuery
-	c.logger.Println("query parameter:", rawQuery)
-
-	if res, err = httpClient.Do(req); err != nil {
-		return nil, err
-	}
-	defer res.Body.Close()
-
-	if response, err = ioutil.ReadAll(res.Body); err != nil {
-		return nil, err
-	}
-	if res.StatusCode >= 200 && res.StatusCode < 300 {
-		return response, nil
-	}
-
-	var errors Errors
-
-	if err = json.Unmarshal(response, &errors); err != nil {
-		return nil, err
-	}
-	if len(errors.Errors) == 0 {
-		return nil, fmt.Errorf("error response is broken")
-	}
-
-	return nil, errors.Errors[0]
+	return c.doContext(ctx, "POST", endpoint, query, payload)
 }
 
 func (c *Client) deleteContext(ctx context.Context, endpoint *url.URL, query url.Values) (response []byte, err error) {
-	var req *http.Request
-	var res *http.Response
-
-	if req, err = http.NewRequest("DELETE", endpoint.String(), nil); err != nil {
-		return nil, err
-	}
-
-	httpClient := &http.Client{}
-	req = req.WithContext(ctx)
-	q := req.URL.Query()
-
-	for key, value := range query {
-		q.Add(key, value[0])
-	}
-
-	// The value of `apiKey` is always required.
-	q.Add("apiKey", c.token)
-	rawQuery := q.Encode()
-	req.URL.RawQuery = rawQuery
-
-	c.logger.Println("GET", endpoint)
-	c.logger.Println("query parameter:", rawQuery)
-
-	if res, err = httpClient.Do(req); err != nil {
-		return nil, err
-	}
-	defer res.Body.Close()
-
-	if response, err = ioutil.ReadAll(res.Body); err != nil {
-		return nil, err
-	}
-	if res.StatusCode >= 200 && res.StatusCode < 300 {
-		return response, nil
-	}
-
-	var errors Errors
-
-	if err = json.Unmarshal(response, &errors); err != nil {
-		return nil, err
-	}
-	if len(errors.Errors) == 0 {
-		return nil, fmt.Errorf("error response is broken")
-	}
-
-	return nil, errors.Errors[0]
+	return c.doContext(ctx, "DELETE", endpoint, query, nil)
 }
 
 func (c *Client) SetLogger(logger *log.Logger) {
@@ -374,10 +247,12 @@ func (c *Client) SetIssueContext(ctx context.Context, issueId int, values url.Va
 	var issue Issue
 	var path *url.URL
 
+	payload := bytes.NewBufferString(values.Encode())
+
 	if path, err = c.root.Parse(fmt.Sprintf("./issues/%v", issueId)); err != nil {
 		return nil, err
 	}
-	if response, err = c.patchContext(ctx, path, values); err != nil {
+	if response, err = c.patchContext(ctx, path, nil, payload); err != nil {
 		return nil, err
 	}
 	if err = json.Unmarshal(response, &issue); err != nil {
