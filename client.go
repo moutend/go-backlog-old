@@ -387,8 +387,8 @@ func (c *Client) SetIssueContext(ctx context.Context, issueId int, values url.Va
 	return &issue, nil
 }
 
-func (c *Client) GetIssuesCount(ctx context.Context, query url.Values) (int, error) {
-	return c.GetIssuesCount(context.Background(), query)
+func (c *Client) GetIssuesCount(query url.Values) (int, error) {
+	return c.GetIssuesCountContext(context.Background(), query)
 }
 
 func (c *Client) GetIssuesCountContext(ctx context.Context, query url.Values) (int, error) {
