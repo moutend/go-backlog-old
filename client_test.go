@@ -1,7 +1,6 @@
 package backlog
 
 import (
-	"context"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -69,81 +68,72 @@ func TestMain(m *testing.M) {
 	return
 }
 
-func TestGetProjectsContext(t *testing.T) {
-	ctx := context.Background()
-	_, err := client.GetProjectsContext(ctx, nil)
+func TestGetProjects(t *testing.T) {
+	_, err := client.GetProjects(nil)
 	if err != nil {
 		t.Fatal(err)
 	}
 	return
 }
 
-func TestGetIssuesContext(t *testing.T) {
-	ctx := context.Background()
-	_, err := client.GetIssuesContext(ctx, nil)
+func TestGetIssues(t *testing.T) {
+	_, err := client.GetIssues(nil)
 	if err != nil {
 		t.Fatal(err)
 	}
 	return
 }
 
-func TestGetIssueContext(t *testing.T) {
-	ctx := context.Background()
-	_, err := client.GetIssueContext(ctx, 12345)
+func TestGetIssue(t *testing.T) {
+	_, err := client.GetIssue(12345)
 	if err != nil {
 		t.Fatal(err)
 	}
 	return
 }
 
-func TestDeleteIssueContext(t *testing.T) {
-	ctx := context.Background()
-	_, err := client.DeleteIssueContext(ctx, 12345)
+func TestDeleteIssue(t *testing.T) {
+	_, err := client.DeleteIssue(12345)
 	if err != nil {
 		t.Fatal(err)
 	}
 	return
 }
 
-func TestSetIssueContext(t *testing.T) {
-	ctx := context.Background()
-	_, err := client.SetIssueContext(ctx, 12345, nil)
+func TestSetIssue(t *testing.T) {
+	_, err := client.SetIssue(12345, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
 	return
 }
 
-func TestGetIssuesCountContext(t *testing.T) {
-	ctx := context.Background()
-	_, err := client.GetIssuesCountContext(ctx, nil)
+func TestGetIssuesCount(t *testing.T) {
+	_, err := client.GetIssuesCount(nil)
 	if err != nil {
 		t.Fatal(err)
 	}
 	return
 }
 
-func TestGetStatusesContext(t *testing.T) {
-	ctx := context.Background()
-	_, err := client.GetStatusesContext(ctx)
+func TestGetStatuses(t *testing.T) {
+	_, err := client.GetStatuses()
 	if err != nil {
 		t.Fatal(err)
 	}
 	return
 }
 
-func TestGetIssueTypesContext(t *testing.T) {
-	ctx := context.Background()
-	_, err := client.GetIssueTypesContext(ctx, 12345)
+func TestGetIssueTypes(t *testing.T) {
+	_, err := client.GetIssueTypes(12345)
 	if err != nil {
 		t.Fatal(err)
 	}
 	return
 }
 
-func TestGetPrioritiesContext(t *testing.T) {
-	ctx := context.Background()
-	_, err := client.GetPrioritiesContext(ctx)
+func TestGetPriorities(t *testing.T) {
+	_, err := client.GetPriorities()
 	if err != nil {
 		t.Fatal(err)
 	}
