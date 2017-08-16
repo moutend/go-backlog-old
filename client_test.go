@@ -96,6 +96,15 @@ func TestGetIssueContext(t *testing.T) {
 	return
 }
 
+func TestDeleteIssueContext(t *testing.T) {
+	ctx := context.Background()
+	_, err := client.DeleteIssueContext(ctx, 12345)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return
+}
+
 func TestSetIssueContext(t *testing.T) {
 	ctx := context.Background()
 	_, err := client.SetIssueContext(ctx, 12345, nil)

@@ -185,6 +185,54 @@ func (c *Client) postContext(ctx context.Context, endpoint *url.URL, query url.V
 	return nil, errors.Errors[0]
 }
 
+func (c *Client) deleteContext(ctx context.Context, endpoint *url.URL, query url.Values) (response []byte, err error) {
+	var req *http.Request
+	var res *http.Response
+
+	if req, err = http.NewRequest("DELETE", endpoint.String(), nil); err != nil {
+		return nil, err
+	}
+
+	httpClient := &http.Client{}
+	req = req.WithContext(ctx)
+	q := req.URL.Query()
+
+	for key, value := range query {
+		q.Add(key, value[0])
+	}
+
+	// The value of `apiKey` is always required.
+	q.Add("apiKey", c.token)
+	rawQuery := q.Encode()
+	req.URL.RawQuery = rawQuery
+
+	c.logger.Println("GET", endpoint)
+	c.logger.Println("query parameter:", rawQuery)
+
+	if res, err = httpClient.Do(req); err != nil {
+		return nil, err
+	}
+	defer res.Body.Close()
+
+	if response, err = ioutil.ReadAll(res.Body); err != nil {
+		return nil, err
+	}
+	if res.StatusCode >= 200 && res.StatusCode < 300 {
+		return response, nil
+	}
+
+	var errors Errors
+
+	if err = json.Unmarshal(response, &errors); err != nil {
+		return nil, err
+	}
+	if len(errors.Errors) == 0 {
+		return nil, fmt.Errorf("error response is broken")
+	}
+
+	return nil, errors.Errors[0]
+}
+
 func (c *Client) SetLogger(logger *log.Logger) {
 	c.logger = logger
 	c.logger.Println("set logger")
@@ -266,6 +314,30 @@ func (c *Client) GetIssueContext(ctx context.Context, issueId int) (*Issue, erro
 
 	return &issue, nil
 }
+
+func (c *Client) DeleteIssue(issueId int) (*Issue, error) {
+	return c.DeleteIssueContext(context.Background(), issueId)
+}
+
+func (c *Client) DeleteIssueContext(ctx context.Context, issueId int) (*Issue, error) {
+	var err error
+	var response []byte
+	var issue Issue
+	var path *url.URL
+
+	if path, err = c.root.Parse(fmt.Sprintf("./issues/%v", issueId)); err != nil {
+		return nil, err
+	}
+	if response, err = c.deleteContext(ctx, path, nil); err != nil {
+		return nil, err
+	}
+	if err = json.Unmarshal(response, &issue); err != nil {
+		return nil, err
+	}
+
+	return &issue, nil
+}
+
 func (c *Client) CreateIssue(values url.Values) (*Issue, error) {
 	return c.CreateIssueContext(context.Background(), values)
 }
