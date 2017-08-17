@@ -74,6 +74,9 @@ func (c *Client) doContext(ctx context.Context, method string, endpoint *url.URL
 	if response, err = ioutil.ReadAll(res.Body); err != nil {
 		return nil, err
 	}
+
+	c.logger.Println(string(response[:]))
+
 	if res.StatusCode >= 200 && res.StatusCode < 300 {
 		return response, nil
 	}
@@ -354,4 +357,24 @@ func (c *Client) GetPrioritiesContext(ctx context.Context) ([]*Priority, error) 
 	}
 
 	return priorities, nil
+}
+
+func (c *Client) GetMyself() (*User, error) {
+	return c.GetMyselfContext(context.Background())
+}
+
+func (c *Client) GetMyselfContext(ctx context.Context) (*User, error) {
+	path, err := c.root.Parse("./users/myself")
+	if err != nil {
+		return nil, err
+	}
+
+	response, err := c.getContext(ctx, path, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	myself := User{}
+	err = json.Unmarshal(response, &myself)
+	return &myself, err
 }
