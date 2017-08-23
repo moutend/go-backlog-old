@@ -378,3 +378,24 @@ func (c *Client) GetMyselfContext(ctx context.Context) (*User, error) {
 	err = json.Unmarshal(response, &myself)
 	return &myself, err
 }
+
+func (c *Client) GetComments(issueId int, values url.Values) ([]*Comment, error) {
+	return c.GetCommentsContext(context.Background(), issueId, values)
+}
+
+func (c *Client) GetCommentsContext(ctx context.Context, issueId int, values url.Values) ([]*Comment, error) {
+	path, err := c.root.Parse(fmt.Sprintf("./issues/%v/comments", issueId))
+	if err != nil {
+		return nil, err
+	}
+
+	response, err := c.getContext(ctx, path, values)
+	if err != nil {
+		return nil, err
+	}
+
+	var comments []*Comment
+	err = json.Unmarshal(response, &comments)
+
+	return comments, err
+}
