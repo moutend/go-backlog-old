@@ -13,7 +13,7 @@ type Issue struct {
 	Status         Status       `json:"status"`
 	Assignee       User         `json:"assignee"`
 	Category       []Category   `json:"category"`
-	Versions       []string     `json:"versions"`
+	Versions       []Version    `json:"versions"`
 	Milestone      []Milestone  `json:"milestone"`
 	StartDate      Date         `json:"startDate"`
 	DueDate        Date         `json:"dueDate"`
