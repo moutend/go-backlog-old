@@ -168,11 +168,11 @@ func (c *Client) GetIssuesContext(ctx context.Context, query url.Values) ([]*Iss
 	return issues, nil
 }
 
-func (c *Client) GetIssue(issueId int) (*Issue, error) {
+func (c *Client) GetIssue(issueId string) (*Issue, error) {
 	return c.GetIssueContext(context.Background(), issueId)
 }
 
-func (c *Client) GetIssueContext(ctx context.Context, issueId int) (*Issue, error) {
+func (c *Client) GetIssueContext(ctx context.Context, issueId string) (*Issue, error) {
 	var err error
 	var response []byte
 	var issue Issue
