@@ -240,11 +240,11 @@ func (c *Client) CreateIssueContext(ctx context.Context, values url.Values) (*Is
 	return &issue, nil
 }
 
-func (c *Client) SetIssue(issueId int, values url.Values) (*Issue, error) {
+func (c *Client) SetIssue(issueId string, values url.Values) (*Issue, error) {
 	return c.SetIssueContext(context.Background(), issueId, values)
 }
 
-func (c *Client) SetIssueContext(ctx context.Context, issueId int, values url.Values) (*Issue, error) {
+func (c *Client) SetIssueContext(ctx context.Context, issueId string, values url.Values) (*Issue, error) {
 	var err error
 	var response []byte
 	var issue Issue
