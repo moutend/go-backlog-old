@@ -379,11 +379,11 @@ func (c *Client) GetMyselfContext(ctx context.Context) (*User, error) {
 	return &myself, err
 }
 
-func (c *Client) GetComments(issueId int, values url.Values) ([]*Comment, error) {
+func (c *Client) GetComments(issueId string, values url.Values) ([]*Comment, error) {
 	return c.GetCommentsContext(context.Background(), issueId, values)
 }
 
-func (c *Client) GetCommentsContext(ctx context.Context, issueId int, values url.Values) ([]*Comment, error) {
+func (c *Client) GetCommentsContext(ctx context.Context, issueId string, values url.Values) ([]*Comment, error) {
 	path, err := c.root.Parse(fmt.Sprintf("./issues/%v/comments", issueId))
 	if err != nil {
 		return nil, err
