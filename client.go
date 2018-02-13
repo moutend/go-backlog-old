@@ -425,3 +425,29 @@ func (c *Client) GetPullRequestsContext(ctx context.Context, projectID, reposito
 
 	return pullRequests, nil
 }
+
+func (c *Client) GetPullRequest(projectID, repositoryID string, number int, query url.Values) (*PullRequest, error) {
+	return c.GetPullRequestContext(context.Background(), projectID, repositoryID, number, query)
+}
+
+func (c *Client) GetPullRequestContext(ctx context.Context, projectID, repositoryID string, number int, query url.Values) (*PullRequest, error) {
+	var err error
+	var response []byte
+	var pullRequest *PullRequest
+	var path *url.URL
+
+	if query == nil {
+		query = url.Values{}
+	}
+	if path, err = c.root.Parse(fmt.Sprintf("./projects/%v/git/repositories/%v/pullRequests/%v", projectID, repositoryID, number)); err != nil {
+		return nil, err
+	}
+	if response, err = c.getContext(ctx, path, query); err != nil {
+		return nil, err
+	}
+	if err = json.Unmarshal(response, &pullRequest); err != nil {
+		return nil, err
+	}
+
+	return pullRequest, nil
+}
