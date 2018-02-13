@@ -399,3 +399,29 @@ func (c *Client) GetCommentsContext(ctx context.Context, issueId string, values 
 
 	return comments, err
 }
+
+func (c *Client) GetPullRequests(projectID, repositoryID string, query url.Values) ([]*PullRequest, error) {
+	return c.GetPullRequestsContext(context.Background(), projectID, repositoryID, query)
+}
+
+func (c *Client) GetPullRequestsContext(ctx context.Context, projectID, repositoryID string, query url.Values) ([]*PullRequest, error) {
+	var err error
+	var response []byte
+	var pullRequests []*PullRequest
+	var path *url.URL
+
+	if query == nil {
+		query = url.Values{}
+	}
+	if path, err = c.root.Parse(fmt.Sprintf("./projects/%v/git/repositories/%v/pullRequests", projectID, repositoryID)); err != nil {
+		return nil, err
+	}
+	if response, err = c.getContext(ctx, path, query); err != nil {
+		return nil, err
+	}
+	if err = json.Unmarshal(response, &pullRequests); err != nil {
+		return nil, err
+	}
+
+	return pullRequests, nil
+}
