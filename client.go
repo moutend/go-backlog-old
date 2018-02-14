@@ -451,3 +451,31 @@ func (c *Client) GetPullRequestContext(ctx context.Context, projectID, repositor
 
 	return pullRequest, nil
 }
+
+func (c *Client) GetPullRequestsCount(projectID, repositoryID string, query url.Values) (int, error) {
+	return c.GetPullRequestsCountContext(context.Background(), projectID, repositoryID, query)
+}
+
+func (c *Client) GetPullRequestsCountContext(ctx context.Context, projectID, repositoryID string, query url.Values) (int, error) {
+	var err error
+	var response []byte
+	var path *url.URL
+
+	if query == nil {
+		query = url.Values{}
+	}
+	if path, err = c.root.Parse(fmt.Sprintf("./projects/%v/git/repositories/%v/pullRequests/count", projectID, repositoryID)); err != nil {
+		return -1, err
+	}
+	if response, err = c.getContext(ctx, path, query); err != nil {
+		return -1, err
+	}
+	var count struct {
+		Count int `json:"count"`
+	}
+	if err = json.Unmarshal(response, &count); err != nil {
+		return -1, err
+	}
+
+	return count.Count, nil
+}
