@@ -1,7 +1,7 @@
 package backlog
 
 type PullRequest struct {
-	ID           int     `json:"id"`
+	Id           int     `json:"id"`
 	ProjectId    int     `json:"projectId"`
 	RepositoryID int     `json:"repositoryID"`
 	Number       int     `json:"number"`
