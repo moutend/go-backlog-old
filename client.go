@@ -479,3 +479,29 @@ func (c *Client) GetPullRequestsCountContext(ctx context.Context, projectID, rep
 
 	return count.Count, nil
 }
+
+func (c *Client) GetRepositories(projectId string, query url.Values) ([]*Repository, error) {
+	return c.GetRepositoriesContext(context.Background(), projectId, query)
+}
+
+func (c *Client) GetRepositoriesContext(ctx context.Context, projectId string, query url.Values) ([]*Repository, error) {
+	var err error
+	var response []byte
+	var repositories []*Repository
+	var path *url.URL
+
+	if query == nil {
+		query = url.Values{}
+	}
+	if path, err = c.root.Parse(fmt.Sprintf("./projects/%v/git/repositories", projectId)); err != nil {
+		return nil, err
+	}
+	if response, err = c.getContext(ctx, path, query); err != nil {
+		return nil, err
+	}
+	if err = json.Unmarshal(response, &repositories); err != nil {
+		return nil, err
+	}
+
+	return repositories, nil
+}
