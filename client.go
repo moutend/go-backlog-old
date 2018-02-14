@@ -505,3 +505,31 @@ func (c *Client) GetRepositoriesContext(ctx context.Context, projectId string, q
 
 	return repositories, nil
 }
+
+func (c *Client) CreatePullRequest(projectId, repositoryId string, values url.Values) (*PullRequest, error) {
+	return c.CreatePullRequestContext(context.Background(), projectId, repositoryId, values)
+}
+
+func (c *Client) CreatePullRequestContext(ctx context.Context, projectId, repositoryId string, values url.Values) (*PullRequest, error) {
+	fmt.Println(projectId, repositoryId, values)
+	return nil, fmt.Errorf("foo")
+	var err error
+	var response []byte
+	var pullRequest PullRequest
+	var path *url.URL
+
+	errorPrefix := "CreatePullRequestContext"
+	payload := bytes.NewBufferString(values.Encode())
+
+	if path, err = c.root.Parse(fmt.Sprintf("./projects/%v/git/repositories/%v/pullRequests", projectId, repositoryId)); err != nil {
+		return nil, fmt.Errorf("%s: %s", errorPrefix, err)
+	}
+	if response, err = c.postContext(ctx, path, nil, payload); err != nil {
+		return nil, fmt.Errorf("%s: %s", errorPrefix, err)
+	}
+	if err = json.Unmarshal(response, &pullRequest); err != nil {
+		return nil, fmt.Errorf("%s: %s", errorPrefix, err)
+	}
+
+	return &pullRequest, nil
+}
