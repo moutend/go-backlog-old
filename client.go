@@ -511,8 +511,6 @@ func (c *Client) CreatePullRequest(projectId, repositoryId string, values url.Va
 }
 
 func (c *Client) CreatePullRequestContext(ctx context.Context, projectId, repositoryId string, values url.Values) (*PullRequest, error) {
-	fmt.Println(projectId, repositoryId, values)
-	return nil, fmt.Errorf("foo")
 	var err error
 	var response []byte
 	var pullRequest PullRequest
@@ -532,4 +530,53 @@ func (c *Client) CreatePullRequestContext(ctx context.Context, projectId, reposi
 	}
 
 	return &pullRequest, nil
+}
+
+func (c *Client) UpdatePullRequest(projectId, repositoryId string, number int, values url.Values) (*PullRequest, error) {
+	return c.UpdatePullRequestContext(context.Background(), projectId, repositoryId, number, values)
+}
+
+func (c *Client) UpdatePullRequestContext(ctx context.Context, projectId, repositoryId string, number int, values url.Values) (*PullRequest, error) {
+	var err error
+	var response []byte
+	var pullRequest PullRequest
+	var path *url.URL
+
+	errorPrefix := "UpdatePullRequestContext"
+	payload := bytes.NewBufferString(values.Encode())
+
+	if path, err = c.root.Parse(fmt.Sprintf("./projects/%v/git/repositories/%v/pullRequests", projectId, repositoryId)); err != nil {
+		return nil, fmt.Errorf("%s: %s", errorPrefix, err)
+	}
+	if response, err = c.patchContext(ctx, path, nil, payload); err != nil {
+		return nil, fmt.Errorf("%s: %s", errorPrefix, err)
+	}
+	if err = json.Unmarshal(response, &pullRequest); err != nil {
+		return nil, fmt.Errorf("%s: %s", errorPrefix, err)
+	}
+
+	return &pullRequest, nil
+}
+
+func (c *Client) GetUsers() ([]*User, error) {
+	return c.GetUsersContext(context.Background())
+}
+
+func (c *Client) GetUsersContext(ctx context.Context) ([]*User, error) {
+	var err error
+	var response []byte
+	var users []*User
+	var path *url.URL
+
+	if path, err = c.root.Parse("./users"); err != nil {
+		return nil, err
+	}
+	if response, err = c.getContext(ctx, path, nil); err != nil {
+		return nil, err
+	}
+	if err = json.Unmarshal(response, &users); err != nil {
+		return nil, err
+	}
+
+	return users, nil
 }
