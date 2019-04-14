@@ -13,27 +13,28 @@ import (
 )
 
 type Client struct {
-	token  string
 	root   *url.URL
+	token  string
 	logger *log.Logger
 }
 
 func New(spaceName, token string) (*Client, error) {
-	var err error
-	var root *url.URL
-
 	if spaceName == "" {
 		return nil, fmt.Errorf("space name is empty")
 	}
-	if root, err = url.Parse("https://" + spaceName + ".backlog.jp/api/v2/"); err != nil {
+	if token == "" {
+		return nil, fmt.Errorf("token is empty")
+	}
+
+	root, err := url.Parse("https://" + spaceName + ".backlog.jp")
+	if err != nil {
 		return nil, err
 	}
 
-	logger := log.New(ioutil.Discard, "", log.LstdFlags)
 	client := &Client{
-		token,
-		root,
-		logger,
+		root:   root,
+		token:  token,
+		logger: log.New(ioutil.Discard, "", log.LstdFlags),
 	}
 
 	return client, nil
@@ -116,26 +117,25 @@ func (c *Client) SetLogger(logger *log.Logger) {
 	return
 }
 
-func (c *Client) GetProjects(query url.Values) ([]*Project, error) {
+func (c *Client) GetProjects(query url.Values) ([]Project, error) {
+	fmt.Println("@@@")
 	return c.GetProjectsContext(context.Background(), query)
 }
 
-func (c *Client) GetProjectsContext(ctx context.Context, query url.Values) ([]*Project, error) {
-	var err error
-	var response []byte
-	var projects []*Project
-	var path *url.URL
+func (c *Client) GetProjectsContext(ctx context.Context, query url.Values) ([]Project, error) {
+	var projects []Project
 
-	if query == nil {
-		query = url.Values{}
-	}
-	if path, err = c.root.Parse("./projects"); err != nil {
+	path, err := c.root.Parse(GetProjectsPath)
+	if err != nil {
 		return nil, err
 	}
-	if response, err = c.getContext(ctx, path, query); err != nil {
+
+	response, err := c.getContext(ctx, path, query)
+	if err != nil {
 		return nil, err
 	}
-	if err = json.Unmarshal(response, &projects); err != nil {
+
+	if err := json.Unmarshal(response, &projects); err != nil {
 		return nil, err
 	}
 
