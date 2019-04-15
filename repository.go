@@ -1,8 +1,8 @@
 package backlog
 
 type Repository struct {
-	Id           int     `json:"id"`
-	ProjectId    int     `json:"projectId"`
+	Id           uint64  `json:"id"`
+	ProjectId    uint64  `json:"projectId"`
 	Name         string  `json:"name"`
 	Description  string  `json:"description"`
 	HookURL      *string `json:"hookUrl"`
