@@ -10,6 +10,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"path"
 )
 
 type Client struct {
@@ -118,14 +119,13 @@ func (c *Client) SetLogger(logger *log.Logger) {
 }
 
 func (c *Client) GetProjects(query url.Values) ([]Project, error) {
-	fmt.Println("@@@")
 	return c.GetProjectsContext(context.Background(), query)
 }
 
 func (c *Client) GetProjectsContext(ctx context.Context, query url.Values) ([]Project, error) {
 	var projects []Project
 
-	path, err := c.root.Parse(GetProjectsPath)
+	path, err := c.root.Parse(getProjectsPath)
 	if err != nil {
 		return nil, err
 	}
@@ -134,7 +134,6 @@ func (c *Client) GetProjectsContext(ctx context.Context, query url.Values) ([]Pr
 	if err != nil {
 		return nil, err
 	}
-
 	if err := json.Unmarshal(response, &projects); err != nil {
 		return nil, err
 	}
@@ -142,23 +141,20 @@ func (c *Client) GetProjectsContext(ctx context.Context, query url.Values) ([]Pr
 	return projects, nil
 }
 
-func (c *Client) GetIssues(query url.Values) ([]*Issue, error) {
+func (c *Client) GetIssues(query url.Values) ([]Issue, error) {
 	return c.GetIssuesContext(context.Background(), query)
 }
 
-func (c *Client) GetIssuesContext(ctx context.Context, query url.Values) ([]*Issue, error) {
-	var err error
-	var response []byte
-	var issues []*Issue
-	var path *url.URL
+func (c *Client) GetIssuesContext(ctx context.Context, query url.Values) ([]Issue, error) {
+	var issues []Issue
 
-	if query == nil {
-		query = url.Values{}
-	}
-	if path, err = c.root.Parse("./issues"); err != nil {
+	path, err := c.root.Parse(getIssuesPath)
+	if err != nil {
 		return nil, err
 	}
-	if response, err = c.getContext(ctx, path, query); err != nil {
+
+	response, err := c.getContext(ctx, path, query)
+	if err != nil {
 		return nil, err
 	}
 	if err = json.Unmarshal(response, &issues); err != nil {
@@ -168,27 +164,27 @@ func (c *Client) GetIssuesContext(ctx context.Context, query url.Values) ([]*Iss
 	return issues, nil
 }
 
-func (c *Client) GetIssue(issueId string) (*Issue, error) {
+func (c *Client) GetIssue(issueId string) (Issue, error) {
 	return c.GetIssueContext(context.Background(), issueId)
 }
 
-func (c *Client) GetIssueContext(ctx context.Context, issueId string) (*Issue, error) {
-	var err error
-	var response []byte
+func (c *Client) GetIssueContext(ctx context.Context, issueId string) (Issue, error) {
 	var issue Issue
-	var path *url.URL
 
-	if path, err = c.root.Parse(fmt.Sprintf("./issues/%v", issueId)); err != nil {
-		return nil, err
-	}
-	if response, err = c.getContext(ctx, path, nil); err != nil {
-		return nil, err
-	}
-	if err = json.Unmarshal(response, &issue); err != nil {
-		return nil, err
+	path, err := c.root.Parse(path.Join(getIssuesPath, issueId))
+	if err != nil {
+		return issue, err
 	}
 
-	return &issue, nil
+	response, err := c.getContext(ctx, path, nil)
+	if err != nil {
+		return issue, err
+	}
+	if err := json.Unmarshal(response, &issue); err != nil {
+		return issue, err
+	}
+
+	return issue, nil
 }
 
 func (c *Client) DeleteIssue(issueId int) (*Issue, error) {

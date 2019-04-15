@@ -1,5 +1,6 @@
 package backlog
 
 const (
-	GetProjectsPath = "/api/v2/projects"
+	getProjectsPath = "/api/v2/projects"
+	getIssuesPath   = "/api/v2/issues"
 )

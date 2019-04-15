@@ -1,10 +1,10 @@
 package backlog
 
 type Issue struct {
-	Id             int          `json:"id"`
-	ProjectId      int          `json:"projectId"`
+	Id             uint64       `json:"id"`
+	ProjectId      uint64       `json:"projectId"`
 	IssueKey       string       `json:"issueKey"`
-	KeyId          int          `json:"keyId"`
+	KeyId          uint64       `json:"keyId"`
 	IssueType      IssueType    `json:"issueType"`
 	Summary        string       `json:"summary"`
 	Description    string       `json:"description"`
