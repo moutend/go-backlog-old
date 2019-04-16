@@ -141,6 +141,27 @@ func (c *Client) GetProjectsContext(ctx context.Context, query url.Values) ([]Pr
 	return projects, nil
 }
 
+func (c *Client) GetProject(projectId uint64) (Project, error) {
+	return c.GetProjectContext(context.Background(), projectId)
+}
+
+func (c *Client) GetProjectContext(ctx context.Context, projectId uint64) (project Project, err error) {
+	path, err := c.root.Parse(path.Join(getProjectsPath, fmt.Sprint(projectId)))
+	if err != nil {
+		return project, err
+	}
+
+	response, err := c.getContext(ctx, path, nil)
+	if err != nil {
+		return project, err
+	}
+	if err := json.Unmarshal(response, &project); err != nil {
+		return project, err
+	}
+
+	return project, nil
+}
+
 func (c *Client) GetIssues(query url.Values) ([]Issue, error) {
 	return c.GetIssuesContext(context.Background(), query)
 }
