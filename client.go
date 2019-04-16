@@ -286,23 +286,23 @@ func (c *Client) GetIssuesCountContext(ctx context.Context, query url.Values) (i
 	return count.Count, nil
 }
 
-func (c *Client) GetStatuses() ([]*Status, error) {
+func (c *Client) GetStatuses() ([]Status, error) {
 	return c.GetStatusesContext(context.Background())
 }
 
-func (c *Client) GetStatusesContext(ctx context.Context) ([]*Status, error) {
-	var err error
-	var response []byte
-	var statuses []*Status
-	var path *url.URL
+func (c *Client) GetStatusesContext(ctx context.Context) ([]Status, error) {
+	var statuses []Status
 
-	if path, err = c.root.Parse("./statuses"); err != nil {
+	path, err := c.root.Parse("./statuses")
+	if err != nil {
 		return nil, err
 	}
-	if response, err = c.getContext(ctx, path, nil); err != nil {
+
+	response, err := c.getContext(ctx, path, nil)
+	if err != nil {
 		return nil, err
 	}
-	if err = json.Unmarshal(response, &statuses); err != nil {
+	if err := json.Unmarshal(response, &statuses); err != nil {
 		return nil, err
 	}
 
@@ -332,23 +332,23 @@ func (c *Client) GetIssueTypesContext(ctx context.Context, projectId int) ([]*Is
 	return issueTypes, nil
 }
 
-func (c *Client) GetPriorities() ([]*Priority, error) {
+func (c *Client) GetPriorities() ([]Priority, error) {
 	return c.GetPrioritiesContext(context.Background())
 }
 
-func (c *Client) GetPrioritiesContext(ctx context.Context) ([]*Priority, error) {
-	var err error
-	var response []byte
-	var priorities []*Priority
-	var path *url.URL
+func (c *Client) GetPrioritiesContext(ctx context.Context) ([]Priority, error) {
+	var priorities []Priority
 
-	if path, err = c.root.Parse("./priorities"); err != nil {
+	path, err := c.root.Parse("./priorities")
+	if err != nil {
 		return nil, err
 	}
-	if response, err = c.getContext(ctx, path, nil); err != nil {
+
+	response, err := c.getContext(ctx, path, nil)
+	if err != nil {
 		return nil, err
 	}
-	if err = json.Unmarshal(response, &priorities); err != nil {
+	if err := json.Unmarshal(response, &priorities); err != nil {
 		return nil, err
 	}
 
