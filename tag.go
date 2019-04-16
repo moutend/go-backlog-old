@@ -1,6 +1,6 @@
 package backlog
 
-type Status struct {
+type Tag struct {
 	Id   uint64 `json:"id"`
 	Name string `json:"name"`
 }

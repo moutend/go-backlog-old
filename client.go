@@ -355,24 +355,26 @@ func (c *Client) GetPrioritiesContext(ctx context.Context) ([]Priority, error) {
 	return priorities, nil
 }
 
-func (c *Client) GetMyself() (*User, error) {
+func (c *Client) GetMyself() (myself User, err error) {
 	return c.GetMyselfContext(context.Background())
 }
 
-func (c *Client) GetMyselfContext(ctx context.Context) (*User, error) {
-	path, err := c.root.Parse("./users/myself")
+func (c *Client) GetMyselfContext(ctx context.Context) (myself User, err error) {
+	path, err := c.root.Parse(path.Join(getUsersPath, "myself"))
 	if err != nil {
-		return nil, err
+		return myself, err
 	}
 
 	response, err := c.getContext(ctx, path, nil)
 	if err != nil {
-		return nil, err
+		return myself, err
 	}
 
-	myself := User{}
-	err = json.Unmarshal(response, &myself)
-	return &myself, err
+	if err := json.Unmarshal(response, &myself); err != nil {
+		return myself, err
+	}
+
+	return myself, nil
 }
 
 func (c *Client) GetIssueComments(issueId uint64, values url.Values) ([]Comment, error) {
@@ -577,4 +579,32 @@ func (c *Client) GetUsersContext(ctx context.Context) ([]*User, error) {
 	}
 
 	return users, nil
+}
+
+func (c *Client) GetWikis(projectIdOrKey string, query url.Values) ([]Wiki, error) {
+	return c.GetWikisContext(context.Background(), projectIdOrKey, query)
+}
+
+func (c *Client) GetWikisContext(ctx context.Context, projectIdOrKey string, query url.Values) ([]Wiki, error) {
+	var wikis []Wiki
+
+	path, err := c.root.Parse(getWikisPath)
+	if err != nil {
+		return nil, err
+	}
+	if query == nil {
+		query = url.Values{}
+	}
+
+	query.Set("projectIdOrKey", projectIdOrKey)
+
+	response, err := c.getContext(ctx, path, query)
+	if err != nil {
+		return nil, err
+	}
+	if err := json.Unmarshal(response, &wikis); err != nil {
+		return nil, err
+	}
+
+	return wikis, nil
 }
