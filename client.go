@@ -608,3 +608,24 @@ func (c *Client) GetWikisContext(ctx context.Context, projectIdOrKey string, que
 
 	return wikis, nil
 }
+
+func (c *Client) GetWiki(wikiId uint64) (Wiki, error) {
+	return c.GetWikiContext(context.Background(), wikiId)
+}
+
+func (c *Client) GetWikiContext(ctx context.Context, wikiId uint64) (wiki Wiki, err error) {
+	path, err := c.root.Parse(path.Join(getWikisPath, fmt.Sprint(wikiId)))
+	if err != nil {
+		return wiki, err
+	}
+
+	response, err := c.getContext(ctx, path, nil)
+	if err != nil {
+		return wiki, err
+	}
+	if err := json.Unmarshal(response, &wiki); err != nil {
+		return wiki, err
+	}
+
+	return wiki, nil
+}

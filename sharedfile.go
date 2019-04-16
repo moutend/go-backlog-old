@@ -1,7 +1,7 @@
 package backlog
 
 type SharedFile struct {
-	d           int    `json:"id"`
+	Id          uint64 `json:"id"`
 	Type        string `json:"type"`
 	Dir         string `json:"dir"`
 	Name        string `json:"name"`
