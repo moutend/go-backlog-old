@@ -19,7 +19,7 @@ type Issue struct {
 	DueDate        Date         `json:"dueDate"`
 	EstimatedHours float64      `json:"estimatedHours"`
 	ActualHours    float64      `json:"actualHours"`
-	ParentIssueId  int          `json:"parentIssueId"`
+	ParentIssueId  uint64       `json:"parentIssueId"`
 	CreatedUser    User         `json:"createdUser"`
 	Created        Date         `json:"created"`
 	UpdateUser     User         `json:"updatedUser"`
