@@ -141,12 +141,12 @@ func (c *Client) GetProjectsContext(ctx context.Context, query url.Values) ([]Pr
 	return projects, nil
 }
 
-func (c *Client) GetProject(projectId uint64) (Project, error) {
-	return c.GetProjectContext(context.Background(), projectId)
+func (c *Client) GetProject(projectIdOrKey string) (Project, error) {
+	return c.GetProjectContext(context.Background(), projectIdOrKey)
 }
 
-func (c *Client) GetProjectContext(ctx context.Context, projectId uint64) (project Project, err error) {
-	path, err := c.root.Parse(path.Join(getProjectsPath, fmt.Sprint(projectId)))
+func (c *Client) GetProjectContext(ctx context.Context, projectIdOrKey string) (project Project, err error) {
+	path, err := c.root.Parse(path.Join(getProjectsPath, projectIdOrKey))
 	if err != nil {
 		return project, err
 	}
@@ -314,7 +314,7 @@ func (c *Client) GetStatuses() ([]Status, error) {
 func (c *Client) GetStatusesContext(ctx context.Context) ([]Status, error) {
 	var statuses []Status
 
-	path, err := c.root.Parse("./statuses")
+	path, err := c.root.Parse(getStatusesPath)
 	if err != nil {
 		return nil, err
 	}
@@ -330,23 +330,23 @@ func (c *Client) GetStatusesContext(ctx context.Context) ([]Status, error) {
 	return statuses, nil
 }
 
-func (c *Client) GetIssueTypes(projectId int) ([]*IssueType, error) {
+func (c *Client) GetIssueTypes(projectId uint64) ([]IssueType, error) {
 	return c.GetIssueTypesContext(context.Background(), projectId)
 }
 
-func (c *Client) GetIssueTypesContext(ctx context.Context, projectId int) ([]*IssueType, error) {
-	var err error
-	var response []byte
-	var issueTypes []*IssueType
-	var path *url.URL
+func (c *Client) GetIssueTypesContext(ctx context.Context, projectId uint64) ([]IssueType, error) {
+	var issueTypes []IssueType
 
-	if path, err = c.root.Parse(fmt.Sprintf("./projects/%v/issueTypes", projectId)); err != nil {
+	path, err := c.root.Parse(path.Join(getProjectsPath, fmt.Sprint(projectId), "issueTypes"))
+	if err != nil {
 		return nil, err
 	}
-	if response, err = c.getContext(ctx, path, nil); err != nil {
+
+	response, err := c.getContext(ctx, path, nil)
+	if err != nil {
 		return nil, err
 	}
-	if err = json.Unmarshal(response, &issueTypes); err != nil {
+	if err := json.Unmarshal(response, &issueTypes); err != nil {
 		return nil, err
 	}
 
@@ -360,7 +360,7 @@ func (c *Client) GetPriorities() ([]Priority, error) {
 func (c *Client) GetPrioritiesContext(ctx context.Context) ([]Priority, error) {
 	var priorities []Priority
 
-	path, err := c.root.Parse("./priorities")
+	path, err := c.root.Parse(getPrioritiesPath)
 	if err != nil {
 		return nil, err
 	}
