@@ -44,16 +44,20 @@ func New(spaceName, token string) (*Client, error) {
 func (c *Client) doContext(ctx context.Context, method string, endpoint *url.URL, query url.Values, payload io.Reader) (response []byte, err error) {
 	c.logger.Println(method, endpoint)
 
-	if query == nil {
-		query = url.Values{}
+	// The value of 'apiKey' is always required.
+	q := url.Values{}
+	q.Add("apiKey", c.token)
+
+	for k, vs := range query {
+		for _, v := range vs {
+			q.Add(k, v)
+		}
 	}
 
-	// The value of 'apiKey' is always required.
-	query.Add("apiKey", c.token)
-	endpoint.RawQuery = query.Encode()
+	endpoint.RawQuery = q.Encode()
 
-	c.logger.Println("query", endpoint.RawQuery)
-	c.logger.Println("payload", payload)
+	c.logger.Println("Query:", endpoint.RawQuery)
+	c.logger.Println("Payload:", payload)
 
 	req, err := http.NewRequest(method, endpoint.String(), payload)
 	if err != nil {
@@ -77,7 +81,7 @@ func (c *Client) doContext(ctx context.Context, method string, endpoint *url.URL
 		return nil, err
 	}
 
-	c.logger.Println(string(response[:]))
+	c.logger.Println("Response:", string(response[:]))
 
 	if res.StatusCode >= 200 && res.StatusCode < 300 {
 		return response, nil
@@ -602,22 +606,17 @@ func (c *Client) GetUsersContext(ctx context.Context) ([]*User, error) {
 	return users, nil
 }
 
-func (c *Client) GetWikis(projectIdOrKey string, query url.Values) ([]Wiki, error) {
-	return c.GetWikisContext(context.Background(), projectIdOrKey, query)
+func (c *Client) GetWikis(query url.Values) ([]Wiki, error) {
+	return c.GetWikisContext(context.Background(), query)
 }
 
-func (c *Client) GetWikisContext(ctx context.Context, projectIdOrKey string, query url.Values) ([]Wiki, error) {
+func (c *Client) GetWikisContext(ctx context.Context, query url.Values) ([]Wiki, error) {
 	var wikis []Wiki
 
 	path, err := c.root.Parse(getWikisPath)
 	if err != nil {
 		return nil, err
 	}
-	if query == nil {
-		query = url.Values{}
-	}
-
-	query.Set("projectIdOrKey", projectIdOrKey)
 
 	response, err := c.getContext(ctx, path, query)
 	if err != nil {
