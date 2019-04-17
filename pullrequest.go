@@ -16,8 +16,8 @@ type PullRequest struct {
 	BranchCommit string  `json:"branchCommit"`
 	CloseAt      *string `json:"closeAt"`
 	MergeAt      string  `json:"mergeAt"`
-	CreateUser   User    `json:"createUser"`
-	Created      string  `json:"created"`
-	UpdateUser   User    `json:"updateUser"`
-	Update       string  `json:"update"`
+	CreatedUser  User    `json:"createdUser"`
+	Created      Date    `json:"created"`
+	UpdatedUser  User    `json:"updatedUser"`
+	Updated      Date    `json:"update"`
 }

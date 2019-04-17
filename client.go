@@ -145,12 +145,12 @@ func (c *Client) GetProjectsContext(ctx context.Context, query url.Values) ([]Pr
 	return projects, nil
 }
 
-func (c *Client) GetProject(projectIdOrKey string) (Project, error) {
-	return c.GetProjectContext(context.Background(), projectIdOrKey)
+func (c *Client) GetProject(projectKeyOrId string) (Project, error) {
+	return c.GetProjectContext(context.Background(), projectKeyOrId)
 }
 
-func (c *Client) GetProjectContext(ctx context.Context, projectIdOrKey string) (project Project, err error) {
-	path, err := c.root.Parse(path.Join(getProjectsPath, projectIdOrKey))
+func (c *Client) GetProjectContext(ctx context.Context, projectKeyOrId string) (project Project, err error) {
+	path, err := c.root.Parse(path.Join(getProjectsPath, projectKeyOrId))
 	if err != nil {
 		return project, err
 	}
@@ -424,21 +424,17 @@ func (c *Client) GetIssueCommentsContext(ctx context.Context, issueId uint64, va
 	return comments, nil
 }
 
-func (c *Client) GetPullRequests(projectId, repositoryId uint64, query url.Values) ([]PullRequest, error) {
-	return c.GetPullRequestsContext(context.Background(), projectId, repositoryId, query)
+func (c *Client) GetPullRequests(projectKeyOrId, repositoryNameOrId string, query url.Values) ([]PullRequest, error) {
+	return c.GetPullRequestsContext(context.Background(), projectKeyOrId, repositoryNameOrId, query)
 }
 
-func (c *Client) GetPullRequestsContext(ctx context.Context, projectId, repositoryId uint64, query url.Values) ([]PullRequest, error) {
+func (c *Client) GetPullRequestsContext(ctx context.Context, projectKeyOrId, repositoryNameOrId string, query url.Values) ([]PullRequest, error) {
 	var prs []PullRequest
 
 	path, err := c.root.Parse(path.Join(
-		getProjectsPath,
-		fmt.Sprint(projectId),
-		"git",
-		"repositories",
-		fmt.Sprint(repositoryId),
-		"pullRequests",
-	))
+		getProjectsPath, projectKeyOrId,
+		"git", "repositories", repositoryNameOrId,
+		"pullRequests"))
 	if err != nil {
 		return nil, err
 	}
@@ -454,30 +450,29 @@ func (c *Client) GetPullRequestsContext(ctx context.Context, projectId, reposito
 	return prs, nil
 }
 
-func (c *Client) GetPullRequest(projectID, repositoryID string, number int, query url.Values) (*PullRequest, error) {
-	return c.GetPullRequestContext(context.Background(), projectID, repositoryID, number, query)
+func (c *Client) GetPullRequest(projectKeyOrId, repositoryNameOrId string, number int, query url.Values) (PullRequest, error) {
+	return c.GetPullRequestContext(context.Background(), projectKeyOrId, repositoryNameOrId, number, query)
 }
 
-func (c *Client) GetPullRequestContext(ctx context.Context, projectID, repositoryID string, number int, query url.Values) (*PullRequest, error) {
-	var err error
-	var response []byte
-	var pullRequest *PullRequest
-	var path *url.URL
-
-	if query == nil {
-		query = url.Values{}
-	}
-	if path, err = c.root.Parse(fmt.Sprintf("./projects/%v/git/repositories/%v/pullRequests/%v", projectID, repositoryID, number)); err != nil {
-		return nil, err
-	}
-	if response, err = c.getContext(ctx, path, query); err != nil {
-		return nil, err
-	}
-	if err = json.Unmarshal(response, &pullRequest); err != nil {
-		return nil, err
+func (c *Client) GetPullRequestContext(ctx context.Context, projectKeyOrId, repositoryNameOrId string, number int, query url.Values) (pr PullRequest, err error) {
+	path, err := c.root.Parse(path.Join(
+		getProjectsPath, projectKeyOrId,
+		"git", "repositories", repositoryNameOrId,
+		"pullRequests", fmt.Sprint(number),
+	))
+	if err != nil {
+		return pr, err
 	}
 
-	return pullRequest, nil
+	response, err := c.getContext(ctx, path, query)
+	if err != nil {
+		return pr, err
+	}
+	if err := json.Unmarshal(response, &pr); err != nil {
+		return pr, err
+	}
+
+	return pr, nil
 }
 
 func (c *Client) GetPullRequestsCount(projectID, repositoryID string, query url.Values) (int, error) {
