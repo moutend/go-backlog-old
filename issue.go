@@ -22,7 +22,7 @@ type Issue struct {
 	ParentIssueId  uint64       `json:"parentIssueId"`
 	CreatedUser    User         `json:"createdUser"`
 	Created        Date         `json:"created"`
-	UpdateUser     User         `json:"updatedUser"`
+	UpdatedUser    User         `json:"updatedUser"`
 	Updated        Date         `json:"updated"`
 	CustomFields   []string     `json:"customFields"`
 	Attachments    []Attachment `json:"attachments"`

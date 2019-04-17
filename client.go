@@ -402,11 +402,11 @@ func (c *Client) GetMyselfContext(ctx context.Context) (myself User, err error) 
 	return myself, nil
 }
 
-func (c *Client) GetIssueComments(issueId uint64, values url.Values) ([]Comment, error) {
-	return c.GetIssueCommentsContext(context.Background(), issueId, values)
+func (c *Client) GetIssueComments(issueId uint64, query url.Values) ([]Comment, error) {
+	return c.GetIssueCommentsContext(context.Background(), issueId, query)
 }
 
-func (c *Client) GetIssueCommentsContext(ctx context.Context, issueId uint64, values url.Values) ([]Comment, error) {
+func (c *Client) GetIssueCommentsContext(ctx context.Context, issueId uint64, query url.Values) ([]Comment, error) {
 	var comments []Comment
 
 	path, err := c.root.Parse(path.Join(getIssuesPath, fmt.Sprint(issueId), "comments"))
@@ -414,7 +414,33 @@ func (c *Client) GetIssueCommentsContext(ctx context.Context, issueId uint64, va
 		return nil, err
 	}
 
-	response, err := c.getContext(ctx, path, values)
+	response, err := c.getContext(ctx, path, query)
+	if err != nil {
+		return nil, err
+	}
+	if err := json.Unmarshal(response, &comments); err != nil {
+		return nil, err
+	}
+	return comments, nil
+}
+
+func (c *Client) GetPullRequestComments(projectKeyOrId, repositoryNameOrId string, number int, query url.Values) ([]Comment, error) {
+	return c.GetPullRequestCommentsContext(context.Background(), projectKeyOrId, repositoryNameOrId, number, query)
+}
+
+func (c *Client) GetPullRequestCommentsContext(ctx context.Context, projectKeyOrId, repositoryNameOrId string, number int, query url.Values) ([]Comment, error) {
+	var comments []Comment
+
+	path, err := c.root.Parse(path.Join(
+		getProjectsPath, projectKeyOrId,
+		"git", "repositories", repositoryNameOrId,
+		"pullRequests", fmt.Sprint(number), "comments",
+	))
+	if err != nil {
+		return nil, err
+	}
+
+	response, err := c.getContext(ctx, path, query)
 	if err != nil {
 		return nil, err
 	}
