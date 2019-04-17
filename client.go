@@ -529,14 +529,14 @@ func (c *Client) GetPullRequestsCountContext(ctx context.Context, projectID, rep
 	return count.Count, nil
 }
 
-func (c *Client) GetRepositories(projectId uint64, query url.Values) ([]Repository, error) {
-	return c.GetRepositoriesContext(context.Background(), projectId, query)
+func (c *Client) GetRepositories(projectKeyOrId string, query url.Values) ([]Repository, error) {
+	return c.GetRepositoriesContext(context.Background(), projectKeyOrId, query)
 }
 
-func (c *Client) GetRepositoriesContext(ctx context.Context, projectId uint64, query url.Values) ([]Repository, error) {
+func (c *Client) GetRepositoriesContext(ctx context.Context, projectKeyOrId string, query url.Values) ([]Repository, error) {
 	var repositories []Repository
 
-	path, err := c.root.Parse(path.Join(getProjectsPath, fmt.Sprint(projectId), "git", "repositories"))
+	path, err := c.root.Parse(path.Join(getProjectsPath, projectKeyOrId, "git", "repositories"))
 	if err != nil {
 		return nil, err
 	}
@@ -550,6 +550,30 @@ func (c *Client) GetRepositoriesContext(ctx context.Context, projectId uint64, q
 	}
 
 	return repositories, nil
+}
+
+func (c *Client) GetRepository(projectKeyOrId, repositoryNameOrId string, query url.Values) (Repository, error) {
+	return c.GetRepositoryContext(context.Background(), projectKeyOrId, repositoryNameOrId, query)
+}
+
+func (c *Client) GetRepositoryContext(ctx context.Context, projectKeyOrId, repositoryNameOrId string, query url.Values) (repository Repository, err error) {
+	path, err := c.root.Parse(path.Join(
+		getProjectsPath, projectKeyOrId,
+		"git", "repositories", repositoryNameOrId,
+	))
+	if err != nil {
+		return repository, err
+	}
+
+	response, err := c.getContext(ctx, path, query)
+	if err != nil {
+		return repository, err
+	}
+	if err := json.Unmarshal(response, &repository); err != nil {
+		return repository, err
+	}
+
+	return repository, nil
 }
 
 func (c *Client) CreatePullRequest(projectId, repositoryId string, values url.Values) (*PullRequest, error) {
