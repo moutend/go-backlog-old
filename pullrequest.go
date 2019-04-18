@@ -57,31 +57,6 @@ func (c *Client) GetPullRequestsContext(ctx context.Context, projectKeyOrId, rep
 	return prs, nil
 }
 
-func (c *Client) GetPullRequest(projectKeyOrId, repositoryNameOrId, number string, query url.Values) (PullRequest, error) {
-	return c.GetPullRequestContext(context.Background(), projectKeyOrId, repositoryNameOrId, number, query)
-}
-
-func (c *Client) GetPullRequestContext(ctx context.Context, projectKeyOrId, repositoryNameOrId, number string, query url.Values) (pr PullRequest, err error) {
-	path, err := c.root.Parse(path.Join(
-		getProjectsPath, projectKeyOrId,
-		"git", "repositories", repositoryNameOrId,
-		"pullRequests", number,
-	))
-	if err != nil {
-		return pr, err
-	}
-
-	response, err := c.getContext(ctx, path, query)
-	if err != nil {
-		return pr, err
-	}
-	if err := json.Unmarshal(response, &pr); err != nil {
-		return pr, err
-	}
-
-	return pr, nil
-}
-
 func (c *Client) GetPullRequestsCount(projectKeyOrId, repositoryNameOrId string, query url.Values) (int, error) {
 	return c.GetPullRequestsCountContext(context.Background(), projectKeyOrId, repositoryNameOrId, query)
 }
@@ -110,6 +85,31 @@ func (c *Client) GetPullRequestsCountContext(ctx context.Context, projectKeyOrId
 	}
 
 	return count.Count, nil
+}
+
+func (c *Client) GetPullRequest(projectKeyOrId, repositoryNameOrId, number string, query url.Values) (PullRequest, error) {
+	return c.GetPullRequestContext(context.Background(), projectKeyOrId, repositoryNameOrId, number, query)
+}
+
+func (c *Client) GetPullRequestContext(ctx context.Context, projectKeyOrId, repositoryNameOrId, number string, query url.Values) (pr PullRequest, err error) {
+	path, err := c.root.Parse(path.Join(
+		getProjectsPath, projectKeyOrId,
+		"git", "repositories", repositoryNameOrId,
+		"pullRequests", number,
+	))
+	if err != nil {
+		return pr, err
+	}
+
+	response, err := c.getContext(ctx, path, query)
+	if err != nil {
+		return pr, err
+	}
+	if err := json.Unmarshal(response, &pr); err != nil {
+		return pr, err
+	}
+
+	return pr, nil
 }
 
 func (c *Client) CreatePullRequest(projectKeyOrId, repositoryNameOrId string, query url.Values) (PullRequest, error) {
