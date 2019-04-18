@@ -11,6 +11,6 @@ type Wiki struct {
 	Stars       []Star       `json:"stars"`
 	CreatedUser User         `json:"createdUser"`
 	Created     Date         `json:"created"`
-	UpdateUser  User         `json:"updatedUser"`
+	UpdatedUser User         `json:"updatedUser"`
 	Updated     Date         `json:"updated"`
 }

@@ -424,17 +424,17 @@ func (c *Client) GetIssueCommentsContext(ctx context.Context, issueId uint64, qu
 	return comments, nil
 }
 
-func (c *Client) GetPullRequestComments(projectKeyOrId, repositoryNameOrId string, number int, query url.Values) ([]Comment, error) {
+func (c *Client) GetPullRequestComments(projectKeyOrId, repositoryNameOrId string, number string, query url.Values) ([]Comment, error) {
 	return c.GetPullRequestCommentsContext(context.Background(), projectKeyOrId, repositoryNameOrId, number, query)
 }
 
-func (c *Client) GetPullRequestCommentsContext(ctx context.Context, projectKeyOrId, repositoryNameOrId string, number int, query url.Values) ([]Comment, error) {
+func (c *Client) GetPullRequestCommentsContext(ctx context.Context, projectKeyOrId, repositoryNameOrId string, number string, query url.Values) ([]Comment, error) {
 	var comments []Comment
 
 	path, err := c.root.Parse(path.Join(
 		getProjectsPath, projectKeyOrId,
 		"git", "repositories", repositoryNameOrId,
-		"pullRequests", fmt.Sprint(number), "comments",
+		"pullRequests", number, "comments",
 	))
 	if err != nil {
 		return nil, err
@@ -476,15 +476,15 @@ func (c *Client) GetPullRequestsContext(ctx context.Context, projectKeyOrId, rep
 	return prs, nil
 }
 
-func (c *Client) GetPullRequest(projectKeyOrId, repositoryNameOrId string, number int, query url.Values) (PullRequest, error) {
+func (c *Client) GetPullRequest(projectKeyOrId, repositoryNameOrId, number string, query url.Values) (PullRequest, error) {
 	return c.GetPullRequestContext(context.Background(), projectKeyOrId, repositoryNameOrId, number, query)
 }
 
-func (c *Client) GetPullRequestContext(ctx context.Context, projectKeyOrId, repositoryNameOrId string, number int, query url.Values) (pr PullRequest, err error) {
+func (c *Client) GetPullRequestContext(ctx context.Context, projectKeyOrId, repositoryNameOrId, number string, query url.Values) (pr PullRequest, err error) {
 	path, err := c.root.Parse(path.Join(
 		getProjectsPath, projectKeyOrId,
 		"git", "repositories", repositoryNameOrId,
-		"pullRequests", fmt.Sprint(number),
+		"pullRequests", number,
 	))
 	if err != nil {
 		return pr, err
