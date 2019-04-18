@@ -189,14 +189,14 @@ func (c *Client) GetIssuesContext(ctx context.Context, query url.Values) ([]Issu
 	return issues, nil
 }
 
-func (c *Client) GetIssue(issueId string) (Issue, error) {
-	return c.GetIssueContext(context.Background(), issueId)
+func (c *Client) GetIssue(issueKeyOrId string) (Issue, error) {
+	return c.GetIssueContext(context.Background(), issueKeyOrId)
 }
 
-func (c *Client) GetIssueContext(ctx context.Context, issueId string) (Issue, error) {
+func (c *Client) GetIssueContext(ctx context.Context, issueKeyOrId string) (Issue, error) {
 	var issue Issue
 
-	path, err := c.root.Parse(path.Join(getIssuesPath, issueId))
+	path, err := c.root.Parse(path.Join(getIssuesPath, issueKeyOrId))
 	if err != nil {
 		return issue, err
 	}
