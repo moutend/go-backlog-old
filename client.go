@@ -16,10 +16,11 @@ type Client struct {
 	token  string
 	logger *log.Logger
 }
+type requestModifyFunc func(*http.Request)
 
 func New(spaceName, token string) (*Client, error) {
 	if spaceName == "" {
-		return nil, fmt.Errorf("space name is empty")
+		return nil, fmt.Errorf("space is empty")
 	}
 	if token == "" {
 		return nil, fmt.Errorf("token is empty")
@@ -39,7 +40,14 @@ func New(spaceName, token string) (*Client, error) {
 	return client, nil
 }
 
-func (c *Client) doContext(ctx context.Context, method string, endpoint *url.URL, query url.Values, payload io.Reader) (response []byte, err error) {
+func (c *Client) SetLogger(logger *log.Logger) {
+	c.logger = logger
+	c.logger.Println("set logger")
+
+	return
+}
+
+func (c *Client) doContext(ctx context.Context, method string, endpoint *url.URL, query url.Values, payload io.Reader, modifyRequest requestModifyFunc) (response []byte, err error) {
 	c.logger.Println(method, endpoint)
 
 	// The value of 'apiKey' is always required.
@@ -62,13 +70,10 @@ func (c *Client) doContext(ctx context.Context, method string, endpoint *url.URL
 		return nil, err
 	}
 
-	httpClient := &http.Client{}
 	req = req.WithContext(ctx)
+	modifyRequest(req)
 
-	if method == "POST" || method == "PATCH" {
-		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-	}
-
+	httpClient := &http.Client{}
 	res, err := httpClient.Do(req)
 	if err != nil {
 		return nil, err
@@ -81,13 +86,13 @@ func (c *Client) doContext(ctx context.Context, method string, endpoint *url.URL
 
 	c.logger.Println("Response:", string(response[:]))
 
-	if res.StatusCode >= 200 && res.StatusCode < 300 {
+	if res.StatusCode >= http.StatusOK && res.StatusCode < http.StatusBadRequest {
 		return response, nil
 	}
 
 	var errors Errors
 
-	if err = json.Unmarshal(response, &errors); err != nil {
+	if err := json.Unmarshal(response, &errors); err != nil {
 		return nil, err
 	}
 	if len(errors.Errors) == 0 {
@@ -98,24 +103,25 @@ func (c *Client) doContext(ctx context.Context, method string, endpoint *url.URL
 }
 
 func (c *Client) getContext(ctx context.Context, endpoint *url.URL, query url.Values) (response []byte, err error) {
-	return c.doContext(ctx, "GET", endpoint, query, nil)
+	return c.doContext(ctx, "GET", endpoint, query, nil, func(req *http.Request) {
+		return
+	})
 }
 
 func (c *Client) patchContext(ctx context.Context, endpoint *url.URL, query url.Values, payload io.Reader) (response []byte, err error) {
-	return c.doContext(ctx, "PATCH", endpoint, query, payload)
+	return c.doContext(ctx, "PATCH", endpoint, query, payload, func(req *http.Request) {
+		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	})
 }
 
 func (c *Client) postContext(ctx context.Context, endpoint *url.URL, query url.Values, payload io.Reader) (response []byte, err error) {
-	return c.doContext(ctx, "POST", endpoint, query, payload)
+	return c.doContext(ctx, "POST", endpoint, query, payload, func(req *http.Request) {
+		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	})
 }
 
 func (c *Client) deleteContext(ctx context.Context, endpoint *url.URL, query url.Values) (response []byte, err error) {
-	return c.doContext(ctx, "DELETE", endpoint, query, nil)
-}
-
-func (c *Client) SetLogger(logger *log.Logger) {
-	c.logger = logger
-	c.logger.Println("set logger")
-
-	return
+	return c.doContext(ctx, "DELETE", endpoint, query, nil, func(req *http.Request) {
+		return
+	})
 }

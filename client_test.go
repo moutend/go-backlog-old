@@ -85,7 +85,7 @@ func TestGetIssues(t *testing.T) {
 }
 
 func TestGetIssue(t *testing.T) {
-	_, err := client.GetIssue(12345)
+	_, err := client.GetIssue("12345")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -93,7 +93,7 @@ func TestGetIssue(t *testing.T) {
 }
 
 func TestDeleteIssue(t *testing.T) {
-	_, err := client.DeleteIssue(12345)
+	_, err := client.DeleteIssue("12345")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -101,7 +101,7 @@ func TestDeleteIssue(t *testing.T) {
 }
 
 func TestSetIssue(t *testing.T) {
-	_, err := client.SetIssue(12345, nil)
+	_, err := client.UpdateIssue("12345", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
